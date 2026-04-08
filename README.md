@@ -10,15 +10,16 @@ partition a set of n distinct objects into k non-empty subsets. These numbers
 grow extremely rapidly and overflow 64-bit floating point for moderate n,
 making direct computation impractical. `logStirling2` sidesteps this by
 working on the log scale via a numerically stable recurrence in C++, enabling
-accurate computation for n in the tens of thousands and beyond — well past the
-overflow limit of existing packages.
+fast and accurate computation for full rows for n past 50,000 — well past the
+practical limit of existing packages.
 
-| Approach | Handles large n? | Vectorized? | Speed |
-|---|:---:|:---:|:---:|
-| `copula::Stirling2` | No (overflows n ≥ 220) | No | Fast |
-| `gmp::Stirling2` | Yes (arbitrary precision) | No | Slow |
-| `logStirling2` | Yes (log scale) | Yes | Fast |
-| `logStirling2Temme` | Yes (asymptotic) | Yes | Fastest |
+| Approach | Handles large n? | Vectorized? | Precision | Speed |
+|---|:---:|:---:|:---:|:---:|
+| `copula::Stirling2` | no (overflows n ≥ 220) | no | double (direct formula) | slow (stores values) |
+| `gmp::Stirling2` | yes | no | exact (big.z) | very slow |
+| `occupancy::logStirling` | yes | yes | double (row recursion) | slow |
+| `logStirling2` | yes | yes | long double + checkpoints (row recursion) | fast |
+| `logStirling2Temme` | yes | yes | asymptotic | fastest |
 
 ## Installation
 
@@ -62,11 +63,6 @@ library(logStirling2)
 
 # Single value: log S(10, 5)
 logStirling2(10, 5)
-#> [1] 9.330718
-
-# Recover the exact count
-exp(logStirling2(10, 5))
-#> [1] 11374
 
 # A slice of the Stirling triangle as a matrix
 logStirling2(n = 5:8, k = 2:5, as.matrix = TRUE)
