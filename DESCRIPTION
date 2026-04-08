@@ -1,0 +1,25 @@
+Package: logStirling2
+Title: Fast Stirling Numbers of the Second Kind
+Version: 0.1.0
+Authors@R: 
+    person("Jon", "Blood", , "jon.blood@example.com", role = c("aut", "cre"))
+Description: Provides efficient tools for calculating Stirling numbers of the 
+    second kind and their logarithms. Includes an exact arbitrary-precision 
+    implementation using 'gmp' that avoids numerical cancellation, a fast 
+    C++ backend with internal caching for log-scale calculations, and 
+    Temme's asymptotic approximation for very large inputs.
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Depends: 
+    R (>= 3.5)
+Imports: 
+    gmp,
+    Rcpp,
+    lamW
+LinkingTo: 
+    Rcpp
+Suggests: 
+    testthat (>= 3.0.0),
+Config/testthat/edition: 3
