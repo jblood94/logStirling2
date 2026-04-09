@@ -39,19 +39,23 @@ NULL
 #'
 #' @examples
 #' # 1. Single value calculation (uses stirling2direct)
-#' logStirling2(10, 5)
+#' logStirling2(100, 10)
 #'
-#' # 2. Matrix output for a range of n and specific k
-#' # Useful for comparing growth across set sizes
-#' logStirling2(n = 5:10, k = 1:5, as.matrix = TRUE)
+#' # 2. Matrix output for specified n and k
+#' logStirling2(n = 5:8, k = 2:5, as.matrix = TRUE)
 #'
 #' # 3. Vector output with 'ones' filtered
 #' # This returns only the "non-trivial" values (1 < k < n)
-#' logStirling2(n = 5, k = NULL, as.matrix = FALSE, ones = FALSE)
+#' logStirling2(n = 8:10, k = NULL, as.matrix = FALSE, ones = FALSE)
 #'
-#' # 4. Using the Temme approximation for large n
-#' # Fast even with very large n
-#' logStirling2Temme(n = 1e5)
+#' # 4. Full row with large n
+#' s <- logStirling2(n = 38e3, k = NULL, as.matrix = FALSE)
+#' length(s)
+#' s[10:13]
+#'
+#' # 4. Temme's asymptotic approximation — fast even for very large n
+#' s <- logStirling2Temme(n = 1e5)
+#' s[1000:1003]
 #'
 #' @name logStirling2
 NULL

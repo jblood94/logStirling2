@@ -106,7 +106,7 @@ For n ≥ 1,000, the function automatically loads pre-computed starting states
 stored in `sysdata.rda` — 50 rows of the triangle (every 1,000th row from
 n = 1,000 to n = 50,000), computed externally with FLINT and ARB and stored as
 raw vectors at `long double` precision. These checkpoints both accelerate
-computation and preserve precision for large n by minimizing the number of
+computation and preserve precision for large n by reducing the number of
 recurrence steps needed.
 
 Depending on the structure of the input vector `n`, the C++ layer dispatches

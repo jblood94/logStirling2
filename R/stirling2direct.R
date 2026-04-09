@@ -1,14 +1,14 @@
 #' Stirling Numbers of the Second Kind (Exact)
 #'
-#' Calculates the exact value of \eqn{S(n, k)} using \code{bigz} integers.
+#' Calculates the exact value of \eqn{S(n,k)} using \code{bigz} integers.
 #'
 #' @param n Positive integer set size.
 #' @param k Integer subset size in \code{1:n}.
 #'
 #' @details Implements the explicit formula for positive arguments:
 #'
-#'   \deqn{S(n, k) = \frac{1}{k!} \sum_{j=1}^k (-1)^{k-j} \binom{k}{j} j^n}
-#'   \deqn{= \frac{1}{k!} \sum_{j=1}^k \binom{-(j+1)}{k-j} j^n}
+#'   \deqn{S(n,k)=\frac{1}{k!}\sum_{j=1}^k(-1)^{k-j}\binom{k}{j}j^n}
+#'   \deqn{=\frac{1}{k!}\sum_{j=1}^k\binom{-(j+1)}{k-j}j^n}
 #'
 #' This is a "direct" calculation similar to \code{gmp::Stirling2(method =
 #' "direct")}, but without cancellation errors for "large" n.
