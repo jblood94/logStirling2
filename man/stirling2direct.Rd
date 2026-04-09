@@ -15,13 +15,13 @@ stirling2direct(n, k)
 A \code{bigz} object.
 }
 \description{
-Calculates the exact value of \eqn{S(n, k)} using \code{bigz} integers.
+Calculates the exact value of \eqn{S(n,k)} using \code{bigz} integers.
 }
 \details{
 Implements the explicit formula for positive arguments:
 
-\deqn{S(n, k) = \frac{1}{k!} \sum_{j=1}^k (-1)^{k-j} \binom{k}{j} j^n}
-\deqn{= \frac{1}{k!} \sum_{j=1}^k \binom{-(j+1)}{k-j} j^n}
+\deqn{S(n,k)=\frac{1}{k!}\sum_{j=1}^k(-1)^{k-j}\binom{k}{j}j^n}
+\deqn{=\frac{1}{k!}\sum_{j=1}^k\binom{-(j+1)}{k-j}j^n}
 
 This is a "direct" calculation similar to \code{gmp::Stirling2(method =
 "direct")}, but without cancellation errors for "large" n.
