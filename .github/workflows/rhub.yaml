@@ -24,7 +24,7 @@ on:
         type: string
 
 env:
-  rhub::rhub_setup(overwrite = TRUE)
+  ASAN_OPTIONS: detect_odr_violation=0
 
 jobs:
 
