@@ -13,14 +13,6 @@ working on the log scale via a numerically stable recurrence in C++, enabling
 fast and accurate computation for full rows for n past 50,000 — well past the
 practical limit of existing packages.
 
-| Approach | Handles large n? | Vectorized? | Precision | Speed |
-|---|:---:|:---:|:---:|:---:|
-| `copula::Stirling2` | no (overflows n ≥ 220) | no | double (direct formula) | slow (stores values) |
-| `gmp::Stirling2` | yes | no | exact (big.z) | very slow |
-| `occupancy::logStirling` | yes | yes | double (row recursion) | slow |
-| `logStirling2` | yes | yes | long double + checkpoints (row recursion) | fast |
-| `logStirling2Temme` | yes | yes | asymptotic | fastest |
-
 ## Installation
 
 The package is not yet on CRAN. Install the development version from GitHub
@@ -61,23 +53,41 @@ integer via the explicit formula using arbitrary-precision arithmetic from
 ```r
 library(logStirling2)
 
-# Single value: log S(10, 5)
-logStirling2(10, 5)
-
 # A slice of the Stirling triangle as a matrix
 logStirling2(n = 5:8, k = 2:5, as.matrix = TRUE)
+#>          2        3        4        5
+#> 5 2.708050 3.218876 2.302585 0.000000
+#> 6 3.433987 4.499810 4.174387 2.708050
+#> 7 4.143135 5.707110 5.857933 4.941642
+#> 8 4.844187 6.873164 7.438972 6.956545
 
-# All non-trivial k for a single n, as a vector
-logStirling2(n = 10, k = NULL, as.matrix = FALSE, ones = FALSE)
-
-# Full row for large n (no overflow)
-logStirling2(n = 5000, k = NULL, as.matrix = FALSE, ones = FALSE)
-
-# Temme approximation — fast even for very large n
-logStirling2Temme(n = 1e5)
+# All non-trivial k for multiple n, as a vector
+logStirling2(n = 8:10, k = NULL, as.matrix = FALSE, ones = FALSE)
+#>  [1]  4.844187  6.873164  7.438972  6.956545  5.583496  3.332205  5.541264
+#>  [8]  8.014666  8.958025  8.846641  7.880804  6.135565  3.583519  6.236370
+#> [15]  9.140990 10.437199 10.657847 10.035699  8.679312  6.620073  3.806662
 
 # Exact big-integer result for a scalar pair
-stirling2direct(200, 10)
+stirling2direct(100, 10)
+#> Big Integer ('bigz') :
+#> [1] 2754999986711164035029356262910003922476368243643133591265713197865860436127311130380917269755
+
+# Full row for large n
+options(digits = 16)
+s <- logStirling2(n = 38e3, k = NULL, as.matrix = FALSE)
+length(s)
+#> [1] 38000
+s[10:13]
+#> [1] 87483.12912120066 91102.51805849221 94406.46547744835 97445.52341968527
+sapply(10:13, \(k) log(stirling2direct(38e3, k)))
+#> [1] 87483.12912120066 91102.51805849221 94406.46547744835 97445.52341968527
+
+# Temme's asymptotic approximation — fast even for very large n
+s <- logStirling2Temme(n = 1e5)
+s[1000:1003]
+#> [1] 684863.3997197171 684956.4409982461 685049.3814779234 685142.2213588482
+sapply(1000:1003, \(k) log(stirling2direct(1e5, k)))
+#> [1] 684863.3997197255 684956.4409982546 685049.3814779319 685142.2213588564
 ```
 
 ## Algorithm
