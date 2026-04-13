@@ -53,7 +53,7 @@ NULL
 #' length(s)
 #' s[10:13]
 #'
-#' # 4. Temme's asymptotic approximation — fast even for very large n
+#' # 5. Temme's asymptotic approximation — fast even for very large n
 #' s <- logStirling2Temme(n = 1e5)
 #' s[1000:1003]
 #'
@@ -146,7 +146,7 @@ logStirling2 <- function(n, k = NULL, as.matrix = TRUE, ones = TRUE) {
 #' @export
 logStirling2Temme <- function(n, k = NULL, as.matrix = TRUE, ones = TRUE) {
   # Returns log(S(n, k)) using Temme's approximation for
-  # k = 4:(n - 2) and exact formulas for k = c(2, 3, n - 2, n - 1).
+  # k = 4:(n - 3) and exact formulas for k = c(2, 3, n - 2, n - 1).
   # https://core.ac.uk/download/pdf/301651745.pdf
   # https://en.wikipedia.org/wiki/Stirling_numbers_of_the_second_kind#Asymptotic_approximation
 
@@ -245,7 +245,7 @@ logStirling2Temme <- function(n, k = NULL, as.matrix = TRUE, ones = TRUE) {
     n <- n[i]
     k <- k[i]
     v <- n/k
-    G <- lamW::lambertW0(v/exp(v))
+    G <- -lamW::lambertW0(-v*exp(-v))
     G1 <- 1 - G
     s[i] <- ((logv1 <- log(v - 1)) - log(v*G1))/2 + lchoose(n, k) +
       (n - k)*(logv1 - log(v - G)) + n*log(k) + k*(G1 - log(n))
@@ -257,4 +257,32 @@ logStirling2Temme <- function(n, k = NULL, as.matrix = TRUE, ones = TRUE) {
   }
 
   s
+}
+
+logStirling2Temme2 <- function(n, k) {
+  v <- -n/k
+  t <- -1 - v
+  x <- lamW::lambertW0(v*exp(v)) - v
+  y <- Rmpfr::log1mexp(x)
+  ex <- exp(-x)
+
+  x0 <- k*t
+  x8 <- 1/x
+  x1 <- x8^2
+  x2 <- k*exp(-x - 2*y)
+  x3 <- n*x1 - x2
+  x5 <- k/t
+  x6 <- x5/x3
+  x7 <- sqrt(x6)
+  x9 <- t*x8
+  x11 <- x6*x7
+  x12 <- 1/t^2
+  x13 <- n*x8*x1
+  x14 <- k*(ex + 1)*exp(-x - 3*y)
+  x15 <- (x11*(x13 - 0.5*x14) - k*x12)/3
+  x16 <- x15/x3
+  x19 <- t/x3
+  lchoose(n, k) + k*(x + y) - n*log(x) - x0 + (n - k)*log(x0) +
+    log(-x9*(t*x1*x11 + 2*x16/x7 - 3*x16*x9 +
+               3*x19*(-(k/x3)^2*x12*(-k*(ex*(ex + 4) + 1)*exp(-x - 4*y)/24 + n/(4*x^4)) + k/(4*t^3) - x15^2*x19*(0.5*n*x1 - 0.5*x2)/k - x15*x5*(-1.0*x13 + 0.5*x14)/(x7*x3^2))/x7 - x6*x8)/k + x7*x9)
 }

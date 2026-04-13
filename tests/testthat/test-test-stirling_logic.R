@@ -37,7 +37,7 @@ test_that("Backend C++ Routing Dispatches Correctly", {
   # doesn't crash when hitting the different branches.
 
   # 1. Row_C (Single row in a cache block)
-  expect_no_error(logStirling2(n = 1050, k = 5))
+  expect_no_error(logStirling2(n = 1050, k = 5:6))
 
   # 2. All_C (Dense sequence crossing a block boundary)
   # 1000:1005 should trigger All_C for block 1000
