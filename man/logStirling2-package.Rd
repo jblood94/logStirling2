@@ -8,7 +8,7 @@
 Provides efficient tools for calculating Stirling numbers of the second kind and their logarithms. Includes an exact arbitrary-precision implementation using 'gmp' that avoids numerical cancellation, a fast C++ backend with internal caching for log-scale calculations, and Temme's asymptotic approximation for very large inputs.
 }
 \author{
-\strong{Maintainer}: Jon Blood \email{jon.blood@example.com}
+\strong{Maintainer}: Jon Blood \email{jblood94@gmail.com}
 
 }
 \keyword{internal}

@@ -13,7 +13,7 @@ test_that("Input sanitation and warnings work", {
   expect_error(suppressWarnings(logStirling2(n = 5, k = 0)), "All k are less than 1.")
 })
 
-test_that("Single value dispatch (stirling2direct bypass) is correct", {
+test_that("Single value dispatch logic is correct", {
   # n = 10, k = 5
   res_mat <- logStirling2(10, 5, as.matrix = TRUE)
   res_vec <- logStirling2(10, 5, as.matrix = FALSE)
@@ -32,21 +32,51 @@ test_that("Small n (n < 3) bypass logic is correct", {
   expect_equal(unname(res[1:2, 1]), c(0, 0))
 })
 
-test_that("Backend C++ Routing Dispatches Correctly", {
-  # We assume standard correctness, but we want to ensure the R logic
-  # doesn't crash when hitting the different branches.
+test_that("Environment warnings fire correctly for high n", {
+  # This tests the new cross-platform safety logic
+  if (.Machine$sizeof.longdouble != 16) {
+    expect_warning(
+      logStirling2(1000, 10),
+      "Your system architecture does not support 16-byte extended precision"
+    )
+  } else {
+    # If 16-byte is supported, check if cache is missing
+    cache_file <- file.path(tools::R_user_dir("logStirling2", "data"),
+                            "logStirling2_cache_v01.rds")
+    ns <- asNamespace("logStirling2")
 
-  # 1. Row_C (Single row in a cache block)
-  expect_no_error(logStirling2(n = 1050, k = 5:6))
+    if (!file.exists(cache_file) && !exists("logS_states", envir = ns, inherits = FALSE)) {
+      expect_warning(
+        logStirling2(1000, 10),
+        "Cached data not found"
+      )
+    }
+  }
+})
 
-  # 2. All_C (Dense sequence crossing a block boundary)
-  # 1000:1005 should trigger All_C for block 1000
-  expect_no_error(res_all <- logStirling2(n = 998:1002, as.matrix = TRUE))
-  expect_equal(nrow(res_all), 5)
+test_that("Backend Routing and Temme Fallback Dispatches Correctly", {
+  # We suppress warnings here because CI servers will lack the cache
+  # or 16-byte support, but we still need to verify output dimensions.
 
-  # 3. Mult_C (Sparse sequence in a block)
-  expect_no_error(res_mult <- logStirling2(n = c(1010, 1050, 1090), as.matrix = TRUE))
-  expect_equal(nrow(res_mult), 3)
+  suppressWarnings({
+    # 1. Row_C (or Temme fallback)
+    expect_no_error(res_row <- logStirling2(n = 1050, k = 5:6, as.matrix = FALSE))
+    expect_equal(length(res_row), 2)
+
+    # 2. All_C (or Temme fallback)
+    expect_no_error(res_all <- logStirling2(n = 998:1002, as.matrix = TRUE))
+    expect_equal(nrow(res_all), 5)
+
+    # 3. Mult_C (or Temme fallback)
+    expect_no_error(res_mult <- logStirling2(n = c(1010, 1050, 1090), as.matrix = TRUE))
+    expect_equal(nrow(res_mult), 3)
+  })
+})
+
+test_that("Temme standalone function executes correctly", {
+  res_temme <- logStirling2Temme(n = 1000, k = 500, as.matrix = FALSE)
+  expect_type(res_temme, "double")
+  expect_false(is.na(res_temme))
 })
 
 test_that("Formatting flags shape the output correctly", {

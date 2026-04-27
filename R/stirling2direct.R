@@ -1,3 +1,6 @@
+#' @importFrom gmp as.bigz chooseZ factorialZ
+NULL
+
 #' Stirling Numbers of the Second Kind (Exact)
 #'
 #' Calculates the exact value of \eqn{S(n,k)} using \code{bigz} integers.
@@ -28,6 +31,8 @@
 #'
 #' @export
 stirling2direct <- function(n, k) {
-  gmp::as.bigz(sum(gmp::chooseZ(-2:-(k + 1), (k - 1):0)*
-                     gmp::as.bigz(1:k)^n)/gmp::factorialZ(k))
+  n <- as.bigz(n)
+  j <- seq(k - 1, 0, -2)
+  abs(as.bigz(sum(chooseZ(k, j)*(j*seq(2, k, 2)^(n - 1) - seq(1, k, 2)^n))/
+                factorialZ(k)))
 }

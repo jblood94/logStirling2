@@ -7,7 +7,7 @@
 \usage{
 logStirling2(n, k = NULL, as.matrix = TRUE, ones = TRUE)
 
-logStirling2Temme(n, k = NULL, as.matrix = TRUE, ones = TRUE)
+logStirling2Temme(n, k = NULL, as.matrix = TRUE, ones = TRUE, twoterms = TRUE)
 }
 \arguments{
 \item{n}{Integer vector of set sizes. Coerced to natural numbers (floor).}
@@ -23,6 +23,9 @@ flat vector.}
   = 1} and \eqn{k = n} (where \eqn{S(n, k) = 1}). This is automatically set
 to \code{TRUE} if \code{as.matrix} is \code{TRUE}, \code{k} is explicitly
 provided, or if \code{any(n < 3)} is \code{TRUE}.}
+
+\item{twoterms}{Logical; if \code{TRUE}, uses Temme's two-term approximation.
+If \code{FALSE}, uses the one-term approximation.}
 }
 \value{
 A numeric matrix or vector containing \eqn{\ln(S(n, k))}. For \eqn{k
@@ -36,34 +39,35 @@ Calculates the natural logarithm of Stirling numbers of the second kind,
 \details{
 The function dispatches to one of three C++ routines (\code{Row_C},
 \code{All_C}, or \code{Mult_C}) depending on the sparsity of the input
-vector \code{n}. If \code{length(n) == 1 && length(k) == 1} is \code{TRUE},
-the function calls \code{stirling2direct}. If \eqn{n \ge 1000}, the
-function automatically loads and utilizes the pre-computed long-double
-state blocks stored in \code{sysdata.rda} to accelerate calculations and
-maintain precision.
+vector \code{n}.
+
+For systems supporting 16-byte \code{long double} precision, if \eqn{n \ge
+  1000}, the function automatically searches for pre-computed state blocks.
+If found in the package namespace or the user's data directory
+(\code{tools::R_user_dir}), these blocks are used to dramatically
+accelerate calculations. If missing, the full table is computed on-the-fly.
+If unsupported (e.g., Apple Silicon/ARM64), the full table is computed
+using standard double precision.
 
 \code{logStirling2Temme} provides a high-speed asymptotic approximation
 based on Temme's method, which is functionally identical in interface but
 trades exactness for performance at very large \eqn{n}.
 }
 \examples{
-# 1. Single value calculation (uses stirling2direct)
-logStirling2(100, 10)
-
-# 2. Matrix output for specified n and k
+# 1. Matrix output for specified n and k
 logStirling2(n = 5:8, k = 2:5, as.matrix = TRUE)
 
-# 3. Vector output with 'ones' filtered
+# 2. Vector output with 'ones' filtered
 # This returns only the "non-trivial" values (1 < k < n)
 logStirling2(n = 8:10, k = NULL, as.matrix = FALSE, ones = FALSE)
 
-# 4. Full row with large n
-s <- logStirling2(n = 38e3, k = NULL, as.matrix = FALSE)
+# 3. Full row with large n
+s <- logStirling2(n = 1e3, as.matrix = FALSE)
 length(s)
 s[10:13]
 
-# 5. Temme's asymptotic approximation — fast even for very large n
-s <- logStirling2Temme(n = 1e5)
+# 4. Temme's asymptotic approximation — fast even for very large n
+s <- logStirling2Temme(n = 1e5, as.matrix = FALSE)
 s[1000:1003]
 
 }

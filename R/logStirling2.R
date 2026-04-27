@@ -2,6 +2,9 @@
 #' @importFrom Rcpp sourceCpp
 NULL
 
+# Internal environment to hold cached states across function calls
+.state_env <- new.env(parent = emptyenv())
+
 #' Logarithms of Stirling Numbers of the Second Kind
 #'
 #' Calculates the natural logarithm of Stirling numbers of the second kind,
@@ -18,14 +21,20 @@ NULL
 #'   = 1} and \eqn{k = n} (where \eqn{S(n, k) = 1}). This is automatically set
 #'   to \code{TRUE} if \code{as.matrix} is \code{TRUE}, \code{k} is explicitly
 #'   provided, or if \code{any(n < 3)} is \code{TRUE}.
+#' @param twoterms Logical; if \code{TRUE}, uses Temme's two-term approximation.
+#'   If \code{FALSE}, uses the one-term approximation.
 #'
 #' @details The function dispatches to one of three C++ routines (\code{Row_C},
 #'   \code{All_C}, or \code{Mult_C}) depending on the sparsity of the input
-#'   vector \code{n}. If \code{length(n) == 1 && length(k) == 1} is \code{TRUE},
-#'   the function calls \code{stirling2direct}. If \eqn{n \ge 1000}, the
-#'   function automatically loads and utilizes the pre-computed long-double
-#'   state blocks stored in \code{sysdata.rda} to accelerate calculations and
-#'   maintain precision.
+#'   vector \code{n}.
+#'
+#'   For systems supporting 16-byte \code{long double} precision, if \eqn{n \ge
+#'   1000}, the function automatically searches for pre-computed state blocks.
+#'   If found in the package namespace or the user's data directory
+#'   (\code{tools::R_user_dir}), these blocks are used to dramatically
+#'   accelerate calculations. If missing, the full table is computed on-the-fly.
+#'   If unsupported (e.g., Apple Silicon/ARM64), the full table is computed
+#'   using standard double precision.
 #'
 #'   \code{logStirling2Temme} provides a high-speed asymptotic approximation
 #'   based on Temme's method, which is functionally identical in interface but
@@ -38,23 +47,20 @@ NULL
 #'   \emph{Studies in Applied Mathematics}, 89(3), 233-243.
 #'
 #' @examples
-#' # 1. Single value calculation (uses stirling2direct)
-#' logStirling2(100, 10)
-#'
-#' # 2. Matrix output for specified n and k
+#' # 1. Matrix output for specified n and k
 #' logStirling2(n = 5:8, k = 2:5, as.matrix = TRUE)
 #'
-#' # 3. Vector output with 'ones' filtered
+#' # 2. Vector output with 'ones' filtered
 #' # This returns only the "non-trivial" values (1 < k < n)
 #' logStirling2(n = 8:10, k = NULL, as.matrix = FALSE, ones = FALSE)
 #'
-#' # 4. Full row with large n
-#' s <- logStirling2(n = 38e3, k = NULL, as.matrix = FALSE)
+#' # 3. Full row with large n
+#' s <- logStirling2(n = 1e3, as.matrix = FALSE)
 #' length(s)
 #' s[10:13]
 #'
-#' # 5. Temme's asymptotic approximation — fast even for very large n
-#' s <- logStirling2Temme(n = 1e5)
+#' # 4. Temme's asymptotic approximation — fast even for very large n
+#' s <- logStirling2Temme(n = 1e5, as.matrix = FALSE)
 #' s[1000:1003]
 #'
 #' @name logStirling2
@@ -86,11 +92,6 @@ logStirling2 <- function(n, k = NULL, as.matrix = TRUE, ones = TRUE) {
       warning("k coerced to natural numbers.")
       k <- floor(k)
     }
-
-    if (length(n) == 1 && length(k) == 1) { # use `stirling2direct`
-      S <- log(stirling2direct(n, k))
-      return(if (as.matrix) matrix(S, 1, 1, 0, list(n, k)) else S)
-    }
   }
 
   # Group n by cache blocks (0-999, 1000-1999, etc.)
@@ -113,23 +114,57 @@ logStirling2 <- function(n, k = NULL, as.matrix = TRUE, ones = TRUE) {
     ones <- TRUE
   } else nu0 <- vector(mode(nu), 0)
 
-  blocks <- split(nu, nu%/%1e3)
-  states <- if (nu[length(nu)] > 999) c(list(NULL), logS_states) else list(NULL)
-  bu <- pmin(as.integer(names(blocks)) + 1, length(states))
-  sb <- states[bu]
-  ni <- match(n, c(nu0, nu))
+  states <- if (.Machine$sizeof.longdouble == 16) {
+    ns <- asNamespace("logStirling2")
+
+    if (!is.null(.state_env$logS_states)) {
+      .state_env$logS_states
+    } else if (exists("logS_states", envir = ns, inherits = FALSE)) {
+      get("logS_states", envir = ns)
+    } else {
+      cache_file <- file.path(tools::R_user_dir("logStirling2", "data"),
+                              "logStirling2_cache_v01.rds")
+      if (file.exists(cache_file)) {
+        .state_env$logS_states <- readRDS(cache_file)
+      } else {
+        warning(paste("Cached data not found. The full Stirling table will be",
+                      "calculated. Run `logStirling2::get_state_data()`",
+                      "to download cached data from the Git repository."),
+                call. = FALSE)
+        NULL
+      }
+    }
+  } else {
+    warning(paste("16-byte extended precision (long double) is not supported",
+                  "by this system. The full Stirling table will be calculated",
+                  "with double precision."),
+            call. = FALSE)
+    NULL
+  }
+
+  if (is.null(states)) {
+    blocks <- list(nu)
+    bu <- list(3L)
+  } else {
+    state_lens <- c(3, lengths(states)/16 + 1)
+    blocks <- split(nu, findInterval(nu, state_lens))
+    bu <- as.numeric(names(blocks))
+    states <- states[bu - 1]
+    if (bu[1] == 1) states <- c(list(NULL), states)
+  }
 
   # Process blocks
   S <- unlist(lapply(1:length(blocks), function(i) {
     if (length(blocks[[i]]) == 1) { # single row
-      logStirling2Row_C(blocks[[i]], state = sb[[i]])
-    } else if (blocks[[i]][1] == (bu[i] - 1)*1e3 + (bu[i] == 1)*3 &&
+      logStirling2Row_C(blocks[[i]], state = states[[i]])
+    } else if (blocks[[i]][1] == state_lens[bu[i]] &&
                all(diff(blocks[[i]]) == 1)) { # all rows
-      logStirling2All_C(blocks[[i]][length(blocks[[i]])], state = sb[[i]])
-    } else logStirling2Mult_C(blocks[[i]], state = sb[[i]])
+      logStirling2All_C(blocks[[i]][length(blocks[[i]])], state = states[[i]])
+    } else logStirling2Mult_C(blocks[[i]], state = states[[i]])
   }), FALSE, FALSE)
 
   S <- unname(split(S, rep.int(nu, nu - 2)))
+  ni <- match(n, c(nu0, nu))
 
   if (is.null(k)) {
     if (!as.matrix && !ones) return(unlist(S[ni])) else k <- 1:nu[length(nu)]
@@ -144,7 +179,8 @@ logStirling2 <- function(n, k = NULL, as.matrix = TRUE, ones = TRUE) {
 
 #' @rdname logStirling2
 #' @export
-logStirling2Temme <- function(n, k = NULL, as.matrix = TRUE, ones = TRUE) {
+logStirling2Temme <- function(n, k = NULL, as.matrix = TRUE, ones = TRUE,
+                              twoterms = TRUE) {
   # Returns log(S(n, k)) using Temme's approximation for
   # k = 4:(n - 3) and exact formulas for k = c(2, 3, n - 2, n - 1).
   # https://core.ac.uk/download/pdf/301651745.pdf
@@ -242,13 +278,18 @@ logStirling2Temme <- function(n, k = NULL, as.matrix = TRUE, ones = TRUE) {
   s[j] <- log(n1[j]) + log1p(n1[j]) - log(2)
 
   if (any(i)) {
-    n <- n[i]
-    k <- k[i]
-    v <- n/k
-    G <- -lamW::lambertW0(-v*exp(-v))
-    G1 <- 1 - G
-    s[i] <- ((logv1 <- log(v - 1)) - log(v*G1))/2 + lchoose(n, k) +
-      (n - k)*(logv1 - log(v - G)) + n*log(k) + k*(G1 - log(n))
+    s[i] <- if (twoterms) {
+      logStirling2Temme2(n[i], k[i])
+    } else {
+      # 1-term asymptotic expansion
+      n <- n[i]
+      k <- k[i]
+      v <- n/k
+      G <- -lamW::lambertW0(-v*exp(-v))
+      G1 <- 1 - G
+      0.5*((logv1 <- log(v - 1)) - log(v*G1)) + lchoose(n, k) +
+        (n - k)*(logv1 - log(v - G)) + n*log(k) + k*(G1 - log(n))
+    }
   }
 
   if (as.matrix) {
@@ -260,29 +301,52 @@ logStirling2Temme <- function(n, k = NULL, as.matrix = TRUE, ones = TRUE) {
 }
 
 logStirling2Temme2 <- function(n, k) {
-  v <- -n/k
-  t <- -1 - v
-  x <- lamW::lambertW0(v*exp(v)) - v
-  y <- Rmpfr::log1mexp(x)
-  ex <- exp(-x)
+  # Returns log(S(n, k)) using Temme's 2-term asymptotic approximation
+  x <- n/k
+  t <- x - 1
+  i <- which(x < 37.43)
 
+  if (length(i)) {
+    v <- x[i]
+    y <- lamW::lambertW0(-v*exp(-v)) + v
+    j <- which(abs(y/expm1(-y) + v) > 5e-15)
+
+    if (length(j)) {
+      z <- y[j]
+      z <- z - (z + v[j]*expm1(-z))/(1 - z/expm1(z))
+      y[j] <- z
+    }
+
+    x[i] <- y
+  }
+
+  ex <- exp(-x)
+  ey <- -1/expm1(-x)
   x0 <- k*t
+  x4 <- ey^2
   x8 <- 1/x
   x1 <- x8^2
-  x2 <- k*exp(-x - 2*y)
-  x3 <- n*x1 - x2
+  x2 <- k*ex*x4
+  x3 <- 1/(n*x1 - x2)
   x5 <- k/t
-  x6 <- x5/x3
+  x6 <- x5*x3
   x7 <- sqrt(x6)
   x9 <- t*x8
   x11 <- x6*x7
   x12 <- 1/t^2
   x13 <- n*x8*x1
-  x14 <- k*(ex + 1)*exp(-x - 3*y)
+  x14 <- k*(ex + 1)*ex*ey*x4
   x15 <- (x11*(x13 - 0.5*x14) - k*x12)/3
-  x16 <- x15/x3
-  x19 <- t/x3
-  lchoose(n, k) + k*(x + y) - n*log(x) - x0 + (n - k)*log(x0) +
-    log(-x9*(t*x1*x11 + 2*x16/x7 - 3*x16*x9 +
-               3*x19*(-(k/x3)^2*x12*(-k*(ex*(ex + 4) + 1)*exp(-x - 4*y)/24 + n/(4*x^4)) + k/(4*t^3) - x15^2*x19*(0.5*n*x1 - 0.5*x2)/k - x15*x5*(-1.0*x13 + 0.5*x14)/(x7*x3^2))/x7 - x6*x8)/k + x7*x9)
+  x16 <- x15*x3
+  x19 <- t*x3
+  lchoose(n, k) + k*(x - log(ey)) - n*log(x) - x0 + (n - k)*log(x0) +
+    log(
+      x7*x9 - x9*(
+        t*x1*x11 + 2*x16/x7 - 3*x16*x9 - x6*x8 - 3*x19*(
+          (k*x3)^2*x12*(n/(4*x^4) - k*ex*x4^2*(ex*(ex + 4) + 1)/24) -
+            k/(4*t^3) + 0.5*x15^2*x19*(n*x1 - x2)/k +
+            x15*x5*x3^2*(0.5*x14 - x13)/x7
+        )/x7
+      )/k
+    )
 }

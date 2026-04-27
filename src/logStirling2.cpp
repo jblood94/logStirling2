@@ -19,15 +19,8 @@ RawVector logStirling2State_C(int n, Nullable<RawVector> state = R_NilValue) {
   // 2. Start from state if provided
   if (state.isNotNull()) {
     RawVector rv(state);
-
-    if (rv.size() % ld_size == 0) {
-      n0 = rv.size()/ld_size;
-      std::memcpy(s.data(), rv.begin(), rv.size());
-    } else {
-      warning("State size is incompatible with this architecture's floating point precision. Reverting from long double to double precision. Stored states not used");
-      n0 = 1;
-    }
-
+    n0 = rv.size()/ld_size;
+    std::memcpy(s.data(), rv.begin(), rv.size());
   } else n0 = 1;
 
   long double* p_s = s.data();
@@ -50,23 +43,14 @@ NumericVector logStirling2Row_C(int n, Nullable<RawVector> state = R_NilValue) {
   // numbers of the second kind. Accepts a length-16 raw vector containing the
   // values of a row to start the calculations.
   if (n < 3) return NumericVector(0);
-  // 1. Determine precision-safe vector size
-  // long double is usually 12 or 16 bytes depending on OS
-  size_t ld_size = sizeof(long double);
   // long double intermediate calculations
   std::vector<long double> s(n - 1, 0.0);
   int n0;
   // 2. Start from state if provided
   if (state.isNotNull()) {
     RawVector rv(state);
-
-    if (rv.size() % ld_size == 0) {
-      n0 = rv.size()/ld_size;
-      std::memcpy(s.data(), rv.begin(), rv.size());
-    } else {
-      warning("State size is incompatible with this architecture's floating point precision. Reverting from long double to double precision. Stored states not used");
-      n0 = 1;
-    }
+    n0 = rv.size()/16;
+    std::memcpy(s.data(), rv.begin(), rv.size());
   } else n0 = 1;
 
   long double* p_s = s.data();
@@ -87,23 +71,14 @@ NumericVector logStirling2All_C(int n, Nullable<RawVector> state = R_NilValue) {
   // the previous row provided as a length-16 raw vector (or starting from n =
   // 3, if omitted).
   if (n < 3) return NumericVector(0);
-  // Determine precision-safe vector size
-  // long double is usually 12 or 16 bytes depending on OS
-  size_t ld_size = sizeof(long double);
   // long double intermediate calculations
   std::vector<long double> s(n - 1, 0.0);
   int n0;
   // Resume from state if provided
   if (state.isNotNull()) {
     RawVector rv(state);
-
-    if (rv.size() % ld_size == 0) {
-      n0 = rv.size()/ld_size + 1;
-      std::memcpy(s.data(), rv.begin(), rv.size());
-    } else {
-      warning("State size is incompatible with this architecture's floating point precision. Reverting from long double to double precision. Stored states not used");
-      n0 = 2;
-    }
+    n0 = rv.size()/16 + 1;
+    std::memcpy(s.data(), rv.begin(), rv.size());
   } else n0 = 2;
 
   // Initialize the results table
@@ -132,12 +107,9 @@ NumericVector logStirling2All_C(int n, Nullable<RawVector> state = R_NilValue) {
 NumericVector logStirling2Mult_C(IntegerVector n,
                                  Nullable<RawVector> state = R_NilValue) {
   // Returns a slice of rows from the log Stirling 2 triangle. Initialized with
-  // the previous row provided as a length-16 raw vector (or starting from n =
-  // 3, if omitted). `n` is assumed to be sorted ascending.
+  // a stored row provided as a length-16 raw vector (or starting from n = 3, if
+  // omitted). `n` is assumed to be sorted ascending.
 
-  // 1. Determine precision-safe vector size
-  // long double is usually 12 or 16 bytes depending on OS
-  size_t ld_size = sizeof(long double);
   int n_len = n.size();
   // long double intermediate calculations
   std::vector<long double> s(n[n_len - 1] - 1, 0.0);
@@ -145,14 +117,8 @@ NumericVector logStirling2Mult_C(IntegerVector n,
   // 2. Resume from state if provided
   if (state.isNotNull()) {
     RawVector rv(state);
-
-    if (rv.size() % ld_size == 0) {
-      n0 = rv.size()/ld_size + 1;
-      std::memcpy(s.data(), rv.begin(), rv.size());
-    } else {
-      warning("State size is incompatible with this architecture's floating point precision. Reverting from long double to double precision. Stored states not used");
-      n0 = 2;
-    }
+    n0 = rv.size()/16 + 1;
+    std::memcpy(s.data(), rv.begin(), rv.size());
   } else n0 = 2;
 
   // Initialize the results table
