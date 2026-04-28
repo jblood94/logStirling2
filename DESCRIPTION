@@ -16,8 +16,7 @@ Depends:
     R (>= 4.1.0)
 Imports: 
     gmp,
-    Rcpp,
-    lamW
+    Rcpp
 LinkingTo: 
     Rcpp
 Suggests: 

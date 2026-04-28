@@ -116,9 +116,8 @@ to one of three routines:
 - **`logStirling2All_C`** — a contiguous range of rows
 - **`logStirling2Mult_C`** — an arbitrary sorted set of rows
 
-`logStirling2Temme` uses the approximation of Temme (1993) and relies on the
-Lambert W function (supplied by the `lamW` package). By default, it uses an
-expression for the two-term approximation after applying common subexpression
+`logStirling2Temme` uses the approximation of Temme (1993). By default, it uses
+an expression for the two-term approximation after applying common subexpression
 elimination.
 
 ## Dependencies
@@ -126,8 +125,6 @@ elimination.
 - [`Rcpp`](https://CRAN.R-project.org/package=Rcpp) — C++ integration
 - [`gmp`](https://CRAN.R-project.org/package=gmp) — arbitrary-precision
   arithmetic for `stirling2direct`
-- [`lamW`](https://CRAN.R-project.org/package=lamW) — Lambert W function for
-  `logStirling2Temme`
 
 ## References
 

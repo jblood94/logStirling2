@@ -285,7 +285,7 @@ logStirling2Temme <- function(n, k = NULL, as.matrix = TRUE, ones = TRUE,
       n <- n[i]
       k <- k[i]
       v <- n/k
-      G <- -lamW::lambertW0(-v*exp(-v))
+      G <- -lambertW0(-v*exp(-v))
       G1 <- 1 - G
       0.5*((logv1 <- log(v - 1)) - log(v*G1)) + lchoose(n, k) +
         (n - k)*(logv1 - log(v - G)) + n*log(k) + k*(G1 - log(n))
@@ -308,7 +308,7 @@ logStirling2Temme2 <- function(n, k) {
 
   if (length(i)) {
     v <- x[i]
-    y <- lamW::lambertW0(-v*exp(-v)) + v
+    y <- lambertW0(-v*exp(-v)) + v
     j <- which(abs(y/expm1(-y) + v) > 5e-15)
 
     if (length(j)) {
@@ -349,4 +349,18 @@ logStirling2Temme2 <- function(n, k) {
         )/x7
       )/k
     )
+}
+
+lambertW0 <- function(x) {
+  # Principal branch of Lambert's W function for `x > 1`
+  w <- (w <- log1p(x))*(1 - log1p(w)/(w + 2))
+
+  for (. in 1:2) {
+    ew <- exp(w)
+    f <- w*ew - x
+    w1 <- w + 1
+    w <- w - f/(ew*w1 - (w1 + 1)*f/(2*w1))
+  }
+
+  w
 }
