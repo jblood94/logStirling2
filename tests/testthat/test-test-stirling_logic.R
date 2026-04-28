@@ -54,7 +54,7 @@ test_that("Environment warnings fire correctly for high n", {
   }
 })
 
-test_that("Backend Routing and Temme Fallback Dispatches Correctly", {
+test_that("Backend Routing Dispatches Correctly", {
   # We suppress warnings here because CI servers will lack the cache
   # or 16-byte support, but we still need to verify output dimensions.
 

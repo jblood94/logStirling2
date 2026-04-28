@@ -144,7 +144,8 @@ logStirling2 <- function(n, k = NULL, as.matrix = TRUE, ones = TRUE) {
 
   if (is.null(states)) {
     blocks <- list(nu)
-    bu <- list(3L)
+    bu <- 1L
+    state_lens <- 3L
   } else {
     state_lens <- c(3, lengths(states)/16 + 1)
     blocks <- split(nu, findInterval(nu, state_lens))
