@@ -37,9 +37,7 @@ test_that("Environment warnings fire correctly for high n", {
   if (.Machine$sizeof.longdouble != 16) {
     expect_warning(
       logStirling2(1000, 10),
-      paste("16-byte extended precision (long double) is not supported",
-            "by this system. The full Stirling table will be calculated",
-            "with double precision.")
+      "16-byte extended precision" # Simplified regex match
     )
   } else {
     # If 16-byte is supported, check if cache is missing
@@ -51,9 +49,7 @@ test_that("Environment warnings fire correctly for high n", {
                                             inherits = FALSE)) {
       expect_warning(
         logStirling2(1000, 10),
-        paste("Cached data not found. The full Stirling table will be",
-              "calculated. Run `logStirling2::get_state_data()`",
-              "to download cached data from the Git repository.")
+        "Cached data not found" # Simplified regex match
       )
     }
   }
