@@ -37,7 +37,9 @@ test_that("Environment warnings fire correctly for high n", {
   if (.Machine$sizeof.longdouble != 16) {
     expect_warning(
       logStirling2(1000, 10),
-      "Your system architecture does not support 16-byte extended precision"
+      paste("16-byte extended precision (long double) is not supported",
+            "by this system. The full Stirling table will be calculated",
+            "with double precision.")
     )
   } else {
     # If 16-byte is supported, check if cache is missing
@@ -45,10 +47,13 @@ test_that("Environment warnings fire correctly for high n", {
                             "logStirling2_cache_v01.rds")
     ns <- asNamespace("logStirling2")
 
-    if (!file.exists(cache_file) && !exists("logS_states", envir = ns, inherits = FALSE)) {
+    if (!file.exists(cache_file) && !exists("logS_states", envir = ns,
+                                            inherits = FALSE)) {
       expect_warning(
         logStirling2(1000, 10),
-        "Cached data not found"
+        paste("Cached data not found. The full Stirling table will be",
+              "calculated. Run `logStirling2::get_state_data()`",
+              "to download cached data from the Git repository.")
       )
     }
   }
