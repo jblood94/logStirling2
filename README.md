@@ -34,19 +34,19 @@ The package exports three user-facing functions:
 workhorse. Accepts vectors for both `n` and `k` and returns results as a
 matrix (rows = n, columns = k) or a flat vector. When `k = NULL`, all valid
 k for each n are returned. Setting `ones = FALSE` drops the trivial edge cases
-S(n, 1) = S(n, n) = 1 (i.e., log = 0) from the output. For a single (n, k)
-pair, it delegates to `stirling2direct` for an exact result prior to taking the
-natural logarithm.
+S(n, 1) = S(n, n) = 1 (i.e., log = 0) from the output.
 
-**`logStirling2Temme(n, k = NULL, as.matrix = TRUE, ones = TRUE)`** — same
-interface as `logStirling2`, but uses Temme's (1993) asymptotic approximation
-for k = 4:(n−2), with exact closed-form expressions at the edges (k = 2, 3,
-n−2, n−1). Much faster than the recurrence for very large n, at the cost of
-exactness.
+**`logStirling2Temme(n, k = NULL, as.matrix = TRUE, ones = TRUE, twoterms = TRUE)`**
+— same interface as `logStirling2`, but uses Temme's (1993) asymptotic
+approximation for k = 4:(n−2), with exact closed-form expressions at the edges
+(k = 2, 3, n−2, n−1). Much faster than the recurrence for very large n, at the
+cost of exactness. The two term asymptotic approximation is used when
+`twoterms = TRUE`; otherwise, the one-term approximation is used.
 
 **`stirling2direct(n, k)`** — computes the exact value of S(n, k) as a `bigz`
-integer via the explicit formula using arbitrary-precision arithmetic from
-`gmp`. Called automatically by `logStirling2` for scalar (n, k) inputs.
+integer via a rearrangement of the explicit formula and using
+arbitrary-precision arithmetic from `gmp`. Called automatically by
+`logStirling2` for scalar (n, k) inputs.
 
 ## Usage
 
@@ -85,7 +85,7 @@ sapply(10:13, \(k) log(stirling2direct(38e3, k)))
 # Temme's asymptotic approximation — fast even for very large n
 s <- logStirling2Temme(n = 1e5)
 s[1000:1003]
-#> [1] 684863.3997197171 684956.4409982461 685049.3814779234 685142.2213588482
+#> [1] 684863.3997197256 684956.4409982545 685049.3814779317 685142.2213588564
 sapply(1000:1003, \(k) log(stirling2direct(1e5, k)))
 #> [1] 684863.3997197255 684956.4409982546 685049.3814779319 685142.2213588564
 ```
@@ -116,8 +116,10 @@ to one of three routines:
 - **`logStirling2All_C`** — a contiguous range of rows
 - **`logStirling2Mult_C`** — an arbitrary sorted set of rows
 
-`logStirling2Temme` uses the approximation of Temme (1993) via the Lambert W
-function (supplied by the `lamW` package).
+`logStirling2Temme` uses the approximation of Temme (1993) and relies on the
+Lambert W function (supplied by the `lamW` package). By default, it uses an
+expression for the two-term approximation after applying common subexpression
+elimination.
 
 ## Dependencies
 
