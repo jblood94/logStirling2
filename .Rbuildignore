@@ -4,5 +4,8 @@
 ^dev_archive$
 ^data-raw$
 ^\.github$
-^README\.html
-^R/sysdata\.rda
+^README\.html$
+^R/sysdata\.rda$
+^cran-comments\.md$
+^\.gitignore$
+^\.github$
