@@ -4,3 +4,5 @@
 ^dev_archive$
 ^data-raw$
 ^\.github$
+^README\.html
+^R/sysdata\.rda

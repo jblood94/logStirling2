@@ -43,11 +43,10 @@ vector \code{n}.
 
 For systems supporting 16-byte \code{long double} precision, if \eqn{n \ge
   1000}, the function automatically searches for pre-computed state blocks.
-If found in the package namespace or the user's data directory
-(\code{tools::R_user_dir}), these blocks are used to dramatically
-accelerate calculations. If missing, the full table is computed on-the-fly.
-If unsupported (e.g., Apple Silicon/ARM64), the full table is computed
-using standard double precision.
+If found in the user's data directory (\code{tools::R_user_dir}), these
+blocks are used to dramatically accelerate calculations. If missing, the
+full table is computed on-the-fly. If unsupported (e.g., Apple
+Silicon/ARM64), the full table is computed using standard double precision.
 
 \code{logStirling2Temme} provides a high-speed asymptotic approximation
 based on Temme's method, which is functionally identical in interface but

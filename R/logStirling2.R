@@ -30,11 +30,10 @@ NULL
 #'
 #'   For systems supporting 16-byte \code{long double} precision, if \eqn{n \ge
 #'   1000}, the function automatically searches for pre-computed state blocks.
-#'   If found in the package namespace or the user's data directory
-#'   (\code{tools::R_user_dir}), these blocks are used to dramatically
-#'   accelerate calculations. If missing, the full table is computed on-the-fly.
-#'   If unsupported (e.g., Apple Silicon/ARM64), the full table is computed
-#'   using standard double precision.
+#'   If found in the user's data directory (\code{tools::R_user_dir}), these
+#'   blocks are used to dramatically accelerate calculations. If missing, the
+#'   full table is computed on-the-fly. If unsupported (e.g., Apple
+#'   Silicon/ARM64), the full table is computed using standard double precision.
 #'
 #'   \code{logStirling2Temme} provides a high-speed asymptotic approximation
 #'   based on Temme's method, which is functionally identical in interface but
@@ -115,12 +114,8 @@ logStirling2 <- function(n, k = NULL, as.matrix = TRUE, ones = TRUE) {
   } else nu0 <- vector(mode(nu), 0)
 
   states <- if (.Machine$sizeof.longdouble == 16) {
-    ns <- asNamespace("logStirling2")
-
     if (!is.null(.state_env$logS_states)) {
       .state_env$logS_states
-    } else if (exists("logS_states", envir = ns, inherits = FALSE)) {
-      get("logS_states", envir = ns)
     } else {
       cache_file <- file.path(tools::R_user_dir("logStirling2", "data"),
                               "logStirling2_cache_v01.rds")

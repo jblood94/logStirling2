@@ -26,6 +26,12 @@ remotes::install_github("jblood94/logStirling2")
 A C++ compiler (Rtools on Windows, Xcode Command Line Tools on macOS) is
 required to build the package from source.
 
+After installation it is recommended to run the function
+`logStirling2::get_state_data()` once to download 1,275,000 pre-computed values
+from the log-Stirling table (~10MB). These will be saved locally to
+`tools::R_user_dir("logStirling2", "data")`. These values will greatly improve
+package performance for large n.
+
 ## Functions
 
 The package exports three user-facing functions:
@@ -45,8 +51,12 @@ cost of exactness. The two term asymptotic approximation is used when
 
 **`stirling2direct(n, k)`** — computes the exact value of S(n, k) as a `bigz`
 integer via a rearrangement of the explicit formula and using
-arbitrary-precision arithmetic from `gmp`. Called automatically by
-`logStirling2` for scalar (n, k) inputs.
+arbitrary-precision arithmetic from `gmp`.
+
+**`get_state_data(force = FALSE)`** — retrieves pre-computed values
+from the GitHub repository and saves them locally at
+`tools::R_user_dir("logStirling2", "data")`. These are used by `logStirling2` to
+speed computation and maintain precision for large n.
 
 ## Usage
 
@@ -103,11 +113,12 @@ The C++ implementation evaluates this with `long double` precision using
 within each row so the update is in-place.
 
 For n ≥ 1,000, the function automatically loads pre-computed starting states
-stored in `sysdata.rda` — 50 rows of the triangle (every 1,000th row from
-n = 1,000 to n = 50,000), computed externally with FLINT and ARB and stored as
-raw vectors at `long double` precision. These checkpoints both accelerate
-computation and preserve precision for large n by reducing the number of
-recurrence steps needed.
+stored in `logStirling2_cache_v01.rds` (retrieved by running the
+`logStirling2::get_state_data` function) — 50 rows of the triangle (every
+1,000th row from n = 1,000 to n = 50,000), computed externally with FLINT and
+ARB and stored as raw vectors at `long double` precision. These checkpoints both
+accelerate computation and preserve precision for large n by reducing the number
+of recurrence steps needed.
 
 Depending on the structure of the input vector `n`, the C++ layer dispatches
 to one of three routines:
