@@ -1,6 +1,6 @@
 Package: logStirling2
 Title: Fast Stirling Numbers of the Second Kind
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: 
     person("Jon", "Blood", , "jblood94@gmail.com", role = c("aut", "cre"))
 Description: Provides efficient tools for calculating Stirling numbers of the 
