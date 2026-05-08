@@ -10,3 +10,6 @@
 ^\.gitignore$
 ^\.github$
 ^cran-comments-v1\.pdf$
+^\.positai$
+^\.claude$
+^CRAN-SUBMISSION$

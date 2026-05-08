@@ -1,6 +1,7 @@
 Package: logStirling2
 Title: Fast Stirling Numbers of the Second Kind
-Version: 0.2.0
+Version: 0.2.1
+Date: 2026-05-08
 Authors@R: 
     person("Jon", "Blood", , "jblood94@gmail.com", role = c("aut", "cre"))
 Description: Provides efficient tools for calculating Stirling numbers of the 
@@ -9,6 +10,8 @@ Description: Provides efficient tools for calculating Stirling numbers of the
     C++ backend with internal caching for log-scale calculations, and 
     Temme's asymptotic approximation for very large inputs.
 License: GPL (>= 3)
+URL: https://github.com/jblood94/logStirling2
+BugReports: https://github.com/jblood94/logStirling2/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3

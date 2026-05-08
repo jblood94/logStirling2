@@ -34,7 +34,7 @@ package performance for large n.
 
 ## Functions
 
-The package exports three user-facing functions:
+The package exports four user-facing functions:
 
 **`logStirling2(n, k = NULL, as.matrix = TRUE, ones = TRUE)`** — the main
 workhorse. Accepts vectors for both `n` and `k` and returns results as a

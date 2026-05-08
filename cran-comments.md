@@ -1,6 +1,8 @@
 # Submission comments
 
-This is a new release of `logStirling2`.
+## Resubmission (v0.2.1)
+* Added URL and BugReports fields to the DESCRIPTION file to link to the project GitHub.
+* Incremented the Version to 0.2.1 to reflect the update.
 
 ## Test environments
 * local Windows installation, R-release [cite: 1.2]
