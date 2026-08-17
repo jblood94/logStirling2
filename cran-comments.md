@@ -1,23 +1,8 @@
-# Submission comments
-
-## Resubmission (v0.2.1)
-* Added URL and BugReports fields to the DESCRIPTION file to link to the project GitHub.
-* Incremented the Version to 0.2.1 to reflect the update.
-
 ## Test environments
-* local Windows installation, R-release [cite: 1.2]
-* ubuntu-latest (on GitHub Actions), R-release [cite: 1.4, 2.2]
-* macos-latest (on GitHub Actions), R-release [cite: 1.4, 2.2]
-* macos-arm64 (R-hub), R-release [cite: 1.4, 2.3]
-* Fedora Linux, R-devel, clang-ASAN [cite: 1.4, 2.3]
-* Ubuntu Linux, R-devel, nold (No Long Double) [cite: 1.4, 2.3]
+* local Windows 11 (R 4.6.1)
+* win-builder (R-devel and R-release)
 
 ## R CMD check results
-There were no ERRORs, WARNINGs, or NOTEs. [cite: 1.2]
+0 errors | 0 warnings | 1 note
 
-## Major Changes
-* Implemented a tiered data strategy (RAM, local disk, and C++ fallback) to handle high-precision calculations of log Stirling numbers of the second kind without exceeding CRAN package size limits. [cite: 1.2, 2.1]
-* Moved large internal data objects (`sysdata.rda`) to `data-raw` to keep the source package lightweight. [cite: 1.2, 3.2]
-* Added platform-specific logic to detect `long double` (16-byte) support, providing high-precision results where hardware allows and falling back gracefully to standard double precision on other architectures (e.g., ARM64). [cite: 1.2, 2.3]
-* Exported `logStirling2Temme()` as a standalone function for users requiring fast asymptotic approximations for very large n, distinct from the exact solver in `logStirling2()`. [cite: 2.1]
-* Removed the `lamW` dependency, replaced with internal C++ implementations. [cite: 1.2, 2.1]
+* This is a new submission.
