@@ -21,3 +21,30 @@ create_ld_state_C <- function(x) {
     .Call(`_logStirling2_create_ld_state_C`, x)
 }
 
+#' Second-Order Eulerian Numbers
+#'
+#' Calculates the exact values of the second-order Eulerian numbers 
+#' \eqn{\langle\langle n, k \rangle\rangle} for a fixed row \eqn{n} and all 
+#' \eqn{k \in \{0, \dots, n-1\}}.
+#'
+#' @param n A positive integer specifying the row index.
+#' @return A \code{bigz} vector of length \code{n} containing the sequence 
+#' \eqn{\langle\langle n, 0 \rangle\rangle, \langle\langle n, 1 \rangle\rangle, \dots, \langle\langle n, n-1 \rangle\rangle}.
+#' @export
+Eulerian2All <- function(n) {
+    .Call(`_logStirling2_Eulerian2All`, n)
+}
+
+#' Stirling Numbers of the Second Kind
+#'
+#' Calculates the exact values of the Stirling numbers of the second kind 
+#' \eqn{S(n, k)} for a fixed \eqn{n} and all \eqn{k \in \{1, \dots, n\}}.
+#'
+#' @param n A positive integer specifying the set size.
+#' @return A \code{bigz} vector of length \code{n} containing the Stirling 
+#' numbers of the second kind \eqn{S(n, 1), S(n, 2), \dots, S(n, n)}.
+#' @export
+Stirling2All <- function(n) {
+    .Call(`_logStirling2_Stirling2All`, n)
+}
+

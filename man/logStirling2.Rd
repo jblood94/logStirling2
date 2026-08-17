@@ -20,7 +20,7 @@ correspond to \code{n} and columns to \code{k}. If \code{FALSE}, returns a
 flat vector.}
 
 \item{ones}{Logical; if \code{FALSE}, excludes the trivial cases where \eqn{k
-  = 1} and \eqn{k = n} (where \eqn{S(n, k) = 1}). This is automatically set
+= 1} and \eqn{k = n} (where \eqn{S(n, k) = 1}). This is automatically set
 to \code{TRUE} if \code{as.matrix} is \code{TRUE}, \code{k} is explicitly
 provided, or if \code{any(n < 3)} is \code{TRUE}.}
 

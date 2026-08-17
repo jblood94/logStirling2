@@ -69,6 +69,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// Eulerian2All
+RObject Eulerian2All(const int n);
+RcppExport SEXP _logStirling2_Eulerian2All(SEXP nSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const int >::type n(nSEXP);
+    rcpp_result_gen = Rcpp::wrap(Eulerian2All(n));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Stirling2All
+RObject Stirling2All(const int n);
+RcppExport SEXP _logStirling2_Stirling2All(SEXP nSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const int >::type n(nSEXP);
+    rcpp_result_gen = Rcpp::wrap(Stirling2All(n));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_logStirling2_logStirling2State_C", (DL_FUNC) &_logStirling2_logStirling2State_C, 2},
@@ -76,6 +98,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_logStirling2_logStirling2All_C", (DL_FUNC) &_logStirling2_logStirling2All_C, 2},
     {"_logStirling2_logStirling2Mult_C", (DL_FUNC) &_logStirling2_logStirling2Mult_C, 2},
     {"_logStirling2_create_ld_state_C", (DL_FUNC) &_logStirling2_create_ld_state_C, 1},
+    {"_logStirling2_Eulerian2All", (DL_FUNC) &_logStirling2_Eulerian2All, 1},
+    {"_logStirling2_Stirling2All", (DL_FUNC) &_logStirling2_Stirling2All, 1},
     {NULL, NULL, 0}
 };
 

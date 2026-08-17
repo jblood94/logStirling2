@@ -25,6 +25,11 @@ Implements the explicit formula for positive arguments:
 
 This is a "direct" calculation similar to \code{gmp::Stirling2(method =
 "direct")}, but without cancellation errors for "large" n.
+
+For extreme cases where \eqn{k < 4} or \eqn{n - k < 5}, the function utilizes
+fast closed-form polynomial expressions. Additionally, for large \eqn{k} where
+the direct summation is slow, the function dynamically branches to a high-performance
+C++ algorithm utilizing second-order Eulerian numbers.
 }
 \examples{
 # Basic usage
