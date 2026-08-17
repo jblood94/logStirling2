@@ -34,7 +34,7 @@ package performance for large n.
 
 ## Functions
 
-The package exports four user-facing functions:
+The package exports six user-facing functions:
 
 **`logStirling2(n, k = NULL, as.matrix = TRUE, ones = TRUE)`** — the main
 workhorse. Accepts vectors for both `n` and `k` and returns results as a
@@ -52,6 +52,14 @@ cost of exactness. The two term asymptotic approximation is used when
 **`stirling2direct(n, k)`** — computes the exact value of S(n, k) as a `bigz`
 integer via a rearrangement of the explicit formula and using
 arbitrary-precision arithmetic from `gmp`.
+
+**`Stirling2All(n)`** — computes the exact values of S(n, k) for all k = 1:n 
+as a `bigz` vector, utilizing a high-performance C++ algorithm and custom 
+hex serialization.
+
+**`Eulerian2All(n)`** — computes the exact values of the second-order Eulerian 
+numbers for a given row n as a `bigz` vector. Used internally by 
+`stirling2direct` to accelerate calculation for large k.
 
 **`get_state_data(force = FALSE)`** — retrieves pre-computed values
 from the GitHub repository and saves them locally at
@@ -81,6 +89,16 @@ logStirling2(n = 8:10, k = NULL, as.matrix = FALSE, ones = FALSE)
 stirling2direct(100, 10)
 #> Big Integer ('bigz') :
 #> [1] 2754999986711164035029356262910003922476368243643133591265713197865860436127311130380917269755
+
+# Exact values for the 5th row of Stirling numbers
+Stirling2All(5)
+#> Big Integer ('bigz') object of length 5:
+#> [1] 1  15 25 10 1 
+
+# Exact values for the 5th row of second-order Eulerian numbers
+Eulerian2All(5)
+#> Big Integer ('bigz') object of length 5:
+#> [1] 1   52  328 444 120
 
 # Full row for large n
 options(digits = 16)
