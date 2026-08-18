@@ -15,8 +15,13 @@ practical limit of existing packages.
 
 ## Installation
 
-The package is not yet on CRAN. Install the development version from GitHub
-with:
+Install the package from CRAN with:
+
+```r
+install.packages("logStirling2")
+```
+
+Or install the development version from GitHub with:
 
 ```r
 # install.packages("remotes")
